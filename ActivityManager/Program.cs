@@ -1,5 +1,24 @@
 ﻿using ActivityManager;
 
-Activity activity = new(1);
+Console.WriteLine("Helo");
 
-Console.WriteLine("Hello, World!");
+while (true)
+{
+    try
+    {
+        var input = Console.ReadLine();
+
+        if (string.IsNullOrEmpty(input))
+        {
+            throw new WrongInputException("Input can't be empty");
+        }
+        else if (input == "exit")
+        {
+            break;
+        }
+    }
+    catch (WrongInputException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
