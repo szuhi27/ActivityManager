@@ -1,2 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using ActivityManager;
+
+Activity activity = new(1);
+
 Console.WriteLine("Hello, World!");
