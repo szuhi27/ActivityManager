@@ -10,16 +10,8 @@ namespace ActivityManager
     {
         public ActivityType[] LoadAndReturnAllActivityTypes() 
         {
-            string path = @"GameSaves.json";
-            if (File.Exists(path))
-            {
-                string files = File.ReadAllText(path);
-                return JsonSerializer.Deserialize<ActivityType[]>(files)!;
-            }
-            else
-            {
-                throw new Exception("Create new save by typing: 'new save'");
-            }
+            string files = File.ReadAllText(@"SaveFile.json");
+            return JsonSerializer.Deserialize<ActivityType[]>(files)!;
         }
 
         public ActivityType ReturnChosenActivityType(int id, ActivityType[] activityTypes)
@@ -39,8 +31,20 @@ namespace ActivityManager
             List<ActivityType> activities = activityTypes.ToList();
             activities.Add(new ActivityType(activityTypes.Length+1,name, Array.Empty<Activity>()));
             string json = JsonSerializer.Serialize(activities.ToArray());
-            File.WriteAllText(@"GameSaves.json", json);
+            File.WriteAllText(@"SaveFile.json", json);
             return activities.ToArray();
+        }
+
+        public ActivityType StartNewActivity(ActivityType currentType)
+        {
+            Activity activity = new(currentType.Activities.Length + 1);
+            string json = JsonSerializer.Serialize(activity);
+            File.WriteAllText(@$"OngoingActivity{currentType.Id}", json);
+
+            List<Activity> newActivitiesList = currentType.Activities.ToList();
+            newActivitiesList.Add(activity);
+
+            return currentType with { Activities = newActivitiesList.ToArray() };
         }
 
     }

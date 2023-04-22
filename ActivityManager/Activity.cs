@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Xml.Linq;
 
 namespace ActivityManager
 {
@@ -19,6 +20,13 @@ namespace ActivityManager
             EndTime = string.Empty;
             Duration = 0;
             Note = string.Empty;
+        }
+
+        public sealed override string ToString()
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.Append($"{Id}: {StartTime} - {EndTime} ({Duration}) {Note}");
+            return stringBuilder.ToString();
         }
 
         public void StopActivity()
