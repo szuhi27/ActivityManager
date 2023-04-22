@@ -3,24 +3,21 @@
 const string TypeFilePath = @"SaveFile.json";
 string openActivityPath = "";
 
-ActivityType[] activityTypes = Array.Empty<ActivityType>();
-ActivityType currentActivityType = new ActivityType(0,"",Array.Empty<Activity>());
+ActivityType[] allActivityTypes = Array.Empty<ActivityType>();
+ActivityType currentActivityType = new(0,"",Array.Empty<Activity>());
 Activity openActivity = new();
 bool inMenu = true;
 DataManager dataManager = new DataManager();
 
-Console.WriteLine("Helo"); //print all saves
+Console.WriteLine("Hello"); //print all saves
 
 if (File.Exists(TypeFilePath))
 {
-    activityTypes = dataManager.LoadAndReturnAllActivityTypes();
-    WriteAllActivityTypes();
-    Console.WriteLine("Type Id of save you want to load. To see all commands type: 'help'.");
+    allActivityTypes = dataManager.LoadJson<ActivityType[]>(TypeFilePath);
+    Console.WriteLine("Type Id of save you want to load. To see all commands type: 'help'."); 
 }
-else
-{
-    Console.WriteLine("Create new save by typing: 'new save'");
-}
+
+WriteAllItemsFromArray(currentActivityType.Activities, "Create new save by typing: 'new save'");
 
 
 while (true)
@@ -46,7 +43,7 @@ while (true)
                 break;
             case "menu":
                 Console.Clear();
-                WriteAllActivityTypes();
+                WriteAllItemsFromArray(allActivityTypes, "Create new save by typing: 'new save'");
                 inMenu = true;
                 break;
             case "new save":
@@ -64,10 +61,24 @@ while (true)
 }
 
 
-
+void WriteAllItemsFromArray<T>(T[] collection, string emptyMsg)
+{
+    if(collection.Length != 0)
+    {
+        foreach (var item in collection)
+        {
+            Console.WriteLine($"{item}");
+        }
+    }
+    else
+    {
+        Console.WriteLine(emptyMsg);
+    }
+}
+/*
 void WriteAllActivityTypes()
 {
-    foreach (var item in activityTypes)
+    foreach (var item in allActivityTypes)
     {
         Console.WriteLine($"{item}");
     }
@@ -86,7 +97,7 @@ void WriteAllActivities()
     {
         Console.WriteLine(" - No activites yet - ");
     }
-}
+}*/
 
 void HandleNewTypeSave()
 {
@@ -94,10 +105,10 @@ void HandleNewTypeSave()
     var input = Console.ReadLine();
     if (!string.IsNullOrEmpty(input))
     {
-        activityTypes = dataManager.CreateNewSave(activityTypes, input);
-        currentActivityType = activityTypes[activityTypes.Length-1];
+        allActivityTypes = dataManager.CreateNewSave(allActivityTypes, input, TypeFilePath);
+        currentActivityType = allActivityTypes[allActivityTypes.Length-1];
         Console.WriteLine($"Current save: {currentActivityType.Id}-{currentActivityType.Name}");
-        WriteAllActivities();
+        WriteAllItemsFromArray(currentActivityType.Activities, " - No activites yet - ");
     }
     else
     {
@@ -107,7 +118,7 @@ void HandleNewTypeSave()
 
 void HandleTypeChoiceById(int id)
 {
-    if (activityTypes.Length == 0) //check if user wants to load when no saves
+    if (allActivityTypes.Length == 0) //check if user wants to load when no saves
     {
         Console.WriteLine("You don't have any saves, to create one type: 'new save'.");
     }
@@ -115,9 +126,9 @@ void HandleTypeChoiceById(int id)
     {
         try
         {
-            currentActivityType = dataManager.ReturnChosenActivityType(id, activityTypes);
+            currentActivityType = dataManager.ReturnChosenActivityType(id, allActivityTypes);
             Console.Clear();
-            WriteAllActivities();
+            WriteAllItemsFromArray(currentActivityType.Activities, " - No activites yet - ");
             inMenu = false;
             openActivityPath = @$"OngoingActivity{currentActivityType.Id}";
         }
@@ -133,13 +144,16 @@ void HandleStartNewActivity()
 {
     if(!File.Exists(openActivityPath))
     {
-        currentActivityType = dataManager.StartNewActivity(currentActivityType);
+        openActivity = new(currentActivityType.Activities.Length + 1);
+        dataManager.SaveJson(openActivity, openActivityPath);
+        currentActivityType = dataManager.ReturnModifiedActivityArray(currentActivityType, openActivity);
+        allActivityTypes = dataManager.ReturnModifiedActivityTypeArray(allActivityTypes, currentActivityType);
+        dataManager.SaveJson(allActivityTypes, TypeFilePath);
     }
     else
     {
         Console.WriteLine("There is already an open activity! Close that first!");
     }
-    
 }
 
 void PrintHelp(bool menuMode)
