@@ -64,7 +64,7 @@ namespace ActivityManager
             File.WriteAllText(path, json);
         }
 
-        void DeleteFile(string path){
+        public void DeleteFile(string path){
             if(File.Exists(path)){
                 File.Delete(path);
             }

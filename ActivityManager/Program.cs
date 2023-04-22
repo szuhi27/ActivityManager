@@ -7,7 +7,7 @@ ActivityType[] allActivityTypes = Array.Empty<ActivityType>();
 ActivityType currentActivityType = new(0,"",Array.Empty<Activity>());
 Activity openActivity = new();
 bool inMenu = true;
-DataManager dataManager = new DataManager();
+DataManager dataManager = new();
 
 Console.WriteLine("Hello"); //print all saves
 
@@ -75,29 +75,6 @@ void WriteAllItemsFromArray<T>(T[] collection, string emptyMsg)
         Console.WriteLine(emptyMsg);
     }
 }
-/*
-void WriteAllActivityTypes()
-{
-    foreach (var item in allActivityTypes)
-    {
-        Console.WriteLine($"{item}");
-    }
-}
-
-void WriteAllActivities()
-{
-    if (currentActivityType.Activities.Length != 0)
-    {
-        foreach (var item in currentActivityType.Activities)
-        {
-            Console.WriteLine($"{item}");
-        }
-    }
-    else
-    {
-        Console.WriteLine(" - No activites yet - ");
-    }
-}*/
 
 void HandleNewTypeSave()
 {
@@ -131,6 +108,11 @@ void HandleTypeChoiceById(int id)
             WriteAllItemsFromArray(currentActivityType.Activities, " - No activites yet - ");
             inMenu = false;
             openActivityPath = @$"OngoingActivity{currentActivityType.Id}";
+            if (File.Exists(openActivityPath))
+            {
+                openActivity = dataManager.LoadJson<Activity>(openActivityPath);
+                Console.WriteLine($"Open activity {openActivity}");
+            }
         }
         catch (WrongInputException e)
         {
@@ -145,15 +127,35 @@ void HandleStartNewActivity()
     if(!File.Exists(openActivityPath))
     {
         openActivity = new(currentActivityType.Activities.Length + 1);
-        dataManager.SaveJson(openActivity, openActivityPath);
-        currentActivityType = dataManager.ReturnModifiedActivityArray(currentActivityType, openActivity);
-        allActivityTypes = dataManager.ReturnModifiedActivityTypeArray(allActivityTypes, currentActivityType);
-        dataManager.SaveJson(allActivityTypes, TypeFilePath);
+        ActivityModified();
     }
     else
     {
         Console.WriteLine("There is already an open activity! Close that first!");
     }
+}
+
+void HandleStopActivity()
+{
+
+}
+
+void HandleAddNoteToActivity()
+{
+
+}
+
+void HandleSaveActivity()
+{
+
+}
+
+void ActivityModified()
+{
+    dataManager.SaveJson(openActivity, openActivityPath);
+    currentActivityType = dataManager.ReturnModifiedActivityArray(currentActivityType, openActivity);
+    allActivityTypes = dataManager.ReturnModifiedActivityTypeArray(allActivityTypes, currentActivityType);
+    dataManager.SaveJson(allActivityTypes, TypeFilePath);
 }
 
 void PrintHelp(bool menuMode)
@@ -176,5 +178,4 @@ void PrintHelp(bool menuMode)
             "go to menu -> menu"
         );
     }
-    
 }
