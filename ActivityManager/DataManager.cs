@@ -14,6 +14,13 @@ namespace ActivityManager
          * also longer repetitive codes that modify certain variables are here
          */
 
+        public enum ActivityModifierCall
+        {
+            add,
+            edit, 
+            remove
+        }
+
         public ActivityType ReturnChosenActivityType(int id, ActivityType[] activityTypes)
         {
             for (int j = 0; j < activityTypes.Length; j++)
@@ -33,11 +40,29 @@ namespace ActivityManager
             SaveJson(activities.ToArray(), path);
             return activities.ToArray();
         }
-        
-        public ActivityType ReturnModifiedActivityArray(ActivityType atype, Activity activity)
+
+        public ActivityType ReturnModifiedActivityArray(ActivityType atype, Activity activity, ActivityModifierCall call)
         {
             List<Activity> newActivitiesList = atype.Activities.ToList();
-            newActivitiesList.Add(activity);
+            switch (call)
+            {
+                case ActivityModifierCall.add:
+                    newActivitiesList.Add(activity);
+                    break;
+                case ActivityModifierCall.edit:
+                    for (int i = 0; i < newActivitiesList.Count; i++)
+                    {
+                        if (newActivitiesList[i].Id == activity.Id)
+                        {
+                            newActivitiesList[i] = activity;
+                        }
+                    }
+                    break;
+                case ActivityModifierCall.remove:
+                    newActivitiesList.Remove(activity);
+                    break;
+            }
+
             return atype with { Activities = newActivitiesList.ToArray() };
         }
 

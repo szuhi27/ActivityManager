@@ -1,23 +1,24 @@
 ﻿using ActivityManager;
 
-const string TypeFilePath = @"SaveFile.json";
+const string TYPE_FILE_PATH = @"SaveFile.json";
+const string NO_TYPE_MSG = "Create new type by typing: 'new type'";
 string openActivityPath = "";
 
 ActivityType[] allActivityTypes = Array.Empty<ActivityType>();
-ActivityType currentActivityType = new(0,"",Array.Empty<Activity>());
-Activity openActivity = new();
+ActivityType? currentActivityType = null;
+Activity? openActivity = new();
 bool inMenu = true;
 DataManager dataManager = new();
 
 Console.WriteLine("Hello"); //print all saves
 
-if (File.Exists(TypeFilePath))
+if (File.Exists(TYPE_FILE_PATH))
 {
-    allActivityTypes = dataManager.LoadJson<ActivityType[]>(TypeFilePath);
+    allActivityTypes = dataManager.LoadJson<ActivityType[]>(TYPE_FILE_PATH);
     Console.WriteLine("Type Id of save you want to load. To see all commands type: 'help'."); 
 }
 
-WriteAllItemsFromArray(currentActivityType.Activities, "Create new save by typing: 'new save'");
+WriteAllItemsFromArray(allActivityTypes, NO_TYPE_MSG);
 
 
 while (true)
@@ -30,7 +31,7 @@ while (true)
     }
     else if (!string.IsNullOrEmpty(input))
     {
-        switch (input)
+        switch (input.ToLower())
         {
             case "exit":
                 Environment.Exit(1);
@@ -43,20 +44,35 @@ while (true)
                 break;
             case "menu":
                 Console.Clear();
-                WriteAllItemsFromArray(allActivityTypes, "Create new save by typing: 'new save'");
+                currentActivityType = null;
+                openActivity = null;
+                openActivityPath = "";
+                WriteAllItemsFromArray(allActivityTypes, NO_TYPE_MSG);
                 inMenu = true;
                 break;
-            case "new save":
+            case "new type":
                 HandleNewTypeSave();
                 break;
             case "start":
                 HandleStartNewActivity();
                 break;
+            case "stop":
+                HandleStopActivity();
+                break;
+            case "note":
+                HandleAddNoteToActivity();
+                break;
+            case "save":
+                HandleSaveActivity();
+                break;
+            default:
+                Console.WriteLine("Unknown input!");
+                break;
         }
     }
     else
     {
-        Console.WriteLine("Unknown input!");
+        Console.WriteLine("Input cant be null!");
     }
 }
 
@@ -82,8 +98,9 @@ void HandleNewTypeSave()
     var input = Console.ReadLine();
     if (!string.IsNullOrEmpty(input))
     {
-        allActivityTypes = dataManager.CreateNewSave(allActivityTypes, input, TypeFilePath);
+        allActivityTypes = dataManager.CreateNewSave(allActivityTypes, input, TYPE_FILE_PATH);
         currentActivityType = allActivityTypes[allActivityTypes.Length-1];
+        openActivityPath = @$"OngoingActivity{currentActivityType.Id}.json";
         Console.WriteLine($"Current save: {currentActivityType.Id}-{currentActivityType.Name}");
         WriteAllItemsFromArray(currentActivityType.Activities, " - No activites yet - ");
     }
@@ -97,7 +114,7 @@ void HandleTypeChoiceById(int id)
 {
     if (allActivityTypes.Length == 0) //check if user wants to load when no saves
     {
-        Console.WriteLine("You don't have any saves, to create one type: 'new save'.");
+        Console.WriteLine($"You don't have any types! {NO_TYPE_MSG}");
     }
     else
     {
@@ -105,9 +122,10 @@ void HandleTypeChoiceById(int id)
         {
             currentActivityType = dataManager.ReturnChosenActivityType(id, allActivityTypes);
             Console.Clear();
+            Console.WriteLine($"Current save: {currentActivityType.Id}-{currentActivityType.Name}");
             WriteAllItemsFromArray(currentActivityType.Activities, " - No activites yet - ");
             inMenu = false;
-            openActivityPath = @$"OngoingActivity{currentActivityType.Id}";
+            openActivityPath = @$"OngoingActivity{currentActivityType.Id}.json";
             if (File.Exists(openActivityPath))
             {
                 openActivity = dataManager.LoadJson<Activity>(openActivityPath);
@@ -118,7 +136,6 @@ void HandleTypeChoiceById(int id)
         {
             Console.WriteLine(e.Message);
         }
-        //todo see if there is ongoing record
     }
 }
 
@@ -127,7 +144,7 @@ void HandleStartNewActivity()
     if(!File.Exists(openActivityPath))
     {
         openActivity = new(currentActivityType.Activities.Length + 1);
-        ActivityModified();
+        ActivityStartedOrModified(DataManager.ActivityModifierCall.add);
     }
     else
     {
@@ -137,25 +154,77 @@ void HandleStartNewActivity()
 
 void HandleStopActivity()
 {
-
+    if (File.Exists(openActivityPath))
+    {
+        openActivity.StopActivity();
+        ActivityStartedOrModified(DataManager.ActivityModifierCall.edit);
+    }
+    else
+    {
+        Console.WriteLine("There is no open activity to stop! Setart one with: start");
+    }
 }
 
 void HandleAddNoteToActivity()
 {
-
+    if (File.Exists(openActivityPath))
+    {
+        Console.WriteLine("enter note");
+        var input = Console.ReadLine();
+        if(!string.IsNullOrEmpty(input))
+        {
+            openActivity.AddNote(input);
+            ActivityStartedOrModified(DataManager.ActivityModifierCall.edit);
+        }
+        else
+        {
+            Console.WriteLine("Note is empty, exiting -add note- mode.");
+            Console.WriteLine($"{openActivity}");
+        }
+    }
+    else
+    {
+        Console.WriteLine("There is no open activity to add note to! Setart one with: start");
+    }
 }
 
 void HandleSaveActivity()
 {
-
+    if (!File.Exists(openActivityPath))
+    {
+        Console.WriteLine("There is no open activity to save! Setart one with: start");
+    }
+    else if (openActivity.EndTime == "")
+    {
+        Console.WriteLine("Stop the activity first!");
+    }
+    else
+    {
+        ActivitySaved(DataManager.ActivityModifierCall.edit);
+        Console.Clear();
+        WriteAllItemsFromArray(currentActivityType.Activities, " - No activites yet - ");
+    }
 }
 
-void ActivityModified()
+void ActivityStartedOrModified(DataManager.ActivityModifierCall call)
 {
     dataManager.SaveJson(openActivity, openActivityPath);
-    currentActivityType = dataManager.ReturnModifiedActivityArray(currentActivityType, openActivity);
+    ActivityTypeModified(call);
+    Console.WriteLine($"{openActivity}");
+}
+
+void ActivitySaved(DataManager.ActivityModifierCall call)
+{
+    ActivityTypeModified(call);
+    openActivity = null;
+    dataManager.DeleteFile(openActivityPath);
+}
+
+void ActivityTypeModified(DataManager.ActivityModifierCall call)
+{
+    currentActivityType = dataManager.ReturnModifiedActivityArray(currentActivityType, openActivity, call);
     allActivityTypes = dataManager.ReturnModifiedActivityTypeArray(allActivityTypes, currentActivityType);
-    dataManager.SaveJson(allActivityTypes, TypeFilePath);
+    dataManager.SaveJson(allActivityTypes, TYPE_FILE_PATH);
 }
 
 void PrintHelp(bool menuMode)
