@@ -10,7 +10,7 @@ Activity openActivity = new();
 bool inMenu = true;
 DataManager dataManager = new();
 
-Console.WriteLine("Hello"); //print all saves
+Console.WriteLine("Hello");
 
 if (File.Exists(TYPE_FILE_PATH))
 {
@@ -100,7 +100,7 @@ void WriteAllItemsFromArray<T>(T[] collection, string emptyMsg)
 
 void HandleNewTypeSave()
 {
-    Console.WriteLine("Enter name: ");
+    Console.Write("Enter name: ");
     var input = Console.ReadLine();
     if (!string.IsNullOrEmpty(input))
     {
@@ -202,7 +202,7 @@ void HandleAddNoteToActivity()
 {
     if (File.Exists(openActivityPath))
     {
-        Console.WriteLine("enter note");
+        Console.Write("Enter note: ");
         var input = Console.ReadLine();
         if(!string.IsNullOrEmpty(input))
         {
