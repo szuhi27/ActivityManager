@@ -6,7 +6,7 @@ string openActivityPath = "";
 
 ActivityType[] allActivityTypes = Array.Empty<ActivityType>();
 ActivityType? currentActivityType = null;
-Activity? openActivity = new();
+Activity openActivity = new();
 bool inMenu = true;
 DataManager dataManager = new();
 
@@ -45,25 +45,31 @@ while (true)
             case "menu":
                 Console.Clear();
                 currentActivityType = null;
-                openActivity = null;
+                openActivity = new();
                 openActivityPath = "";
                 WriteAllItemsFromArray(allActivityTypes, NO_TYPE_MSG);
                 inMenu = true;
                 break;
             case "new type":
-                HandleNewTypeSave();
+                if (inMenu) { HandleNewTypeSave(); }
+                break;
+            case "delete type":
+                if (inMenu) { HandleDeleteType(); }
                 break;
             case "start":
-                HandleStartNewActivity();
+                if (!inMenu) { HandleStartNewActivity(); }
                 break;
             case "stop":
-                HandleStopActivity();
+                if (!inMenu) { HandleStopActivity(); }
                 break;
             case "note":
-                HandleAddNoteToActivity();
+                if (!inMenu) { HandleAddNoteToActivity(); }
                 break;
             case "save":
-                HandleSaveActivity();
+                if (!inMenu) { HandleSaveActivity(); }
+                break;
+            case "delete":
+                if(!inMenu) { HandleDeleteActivity(); }
                 break;
             default:
                 Console.WriteLine("Unknown input!");
@@ -98,15 +104,42 @@ void HandleNewTypeSave()
     var input = Console.ReadLine();
     if (!string.IsNullOrEmpty(input))
     {
-        allActivityTypes = dataManager.CreateNewSave(allActivityTypes, input, TYPE_FILE_PATH);
+        allActivityTypes = dataManager.CreateNewType(allActivityTypes, input, TYPE_FILE_PATH);
         currentActivityType = allActivityTypes[allActivityTypes.Length-1];
         openActivityPath = @$"OngoingActivity{currentActivityType.Id}.json";
+        Console.Clear();
         Console.WriteLine($"Current save: {currentActivityType.Id}-{currentActivityType.Name}");
         WriteAllItemsFromArray(currentActivityType.Activities, " - No activites yet - ");
     }
     else
     {
         Console.WriteLine("Name can't be null");
+    }
+}
+
+void HandleDeleteType()
+{
+    Console.Write("Enter id you want to delete: ");
+    var input = Console.ReadLine();
+    if(int.TryParse(input, out int intInput))
+    {
+        try
+        {
+            ActivityType activityType = dataManager.ReturnActivityTypeBasedOnId(intInput, allActivityTypes);
+            allActivityTypes = dataManager.DeleteType(allActivityTypes, activityType);
+            dataManager.SaveJson(allActivityTypes, TYPE_FILE_PATH);
+            Console.Clear();            
+            Console.WriteLine($"{activityType} - deleted\n");
+            WriteAllItemsFromArray(allActivityTypes, NO_TYPE_MSG);
+        }
+        catch (WrongInputException e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+    else
+    {
+        Console.WriteLine("Incorrect id");
     }
 }
 
@@ -120,7 +153,7 @@ void HandleTypeChoiceById(int id)
     {
         try
         {
-            currentActivityType = dataManager.ReturnChosenActivityType(id, allActivityTypes);
+            currentActivityType = dataManager.ReturnActivityTypeBasedOnId(id, allActivityTypes);
             Console.Clear();
             Console.WriteLine($"Current save: {currentActivityType.Id}-{currentActivityType.Name}");
             WriteAllItemsFromArray(currentActivityType.Activities, " - No activites yet - ");
@@ -206,23 +239,53 @@ void HandleSaveActivity()
     }
 }
 
+void HandleDeleteActivity()
+{
+    Console.Write("Enter id you want to delete: ");
+    var input = Console.ReadLine();
+    if (int.TryParse(input, out int intInput))
+    {
+        try
+        {
+            Activity activityToDelete = dataManager.ReturnActivityBasedOnId(intInput, currentActivityType.Activities);
+            if(intInput == openActivity.Id)
+            {
+                openActivity = new();
+                dataManager.DeleteFile(openActivityPath);
+            }
+            ActivityTypeModified(DataManager.ActivityModifierCall.remove, activityToDelete);
+            Console.Clear();
+            Console.WriteLine($"{activityToDelete} - deleted\n");
+            WriteAllItemsFromArray(currentActivityType.Activities, " - No activites yet - ");
+        }
+        catch (WrongInputException e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+    else
+    {
+        Console.WriteLine("Incorrect id");
+    }
+}
+
 void ActivityStartedOrModified(DataManager.ActivityModifierCall call)
 {
     dataManager.SaveJson(openActivity, openActivityPath);
-    ActivityTypeModified(call);
+    ActivityTypeModified(call, openActivity);
     Console.WriteLine($"{openActivity}");
 }
 
 void ActivitySaved(DataManager.ActivityModifierCall call)
 {
-    ActivityTypeModified(call);
-    openActivity = null;
+    ActivityTypeModified(call, openActivity);
+    openActivity = new();
     dataManager.DeleteFile(openActivityPath);
 }
 
-void ActivityTypeModified(DataManager.ActivityModifierCall call)
+void ActivityTypeModified(DataManager.ActivityModifierCall call, Activity activity)
 {
-    currentActivityType = dataManager.ReturnModifiedActivityArray(currentActivityType, openActivity, call);
+    currentActivityType = dataManager.ReturnModifiedActivityArray(currentActivityType, activity, call);
     allActivityTypes = dataManager.ReturnModifiedActivityTypeArray(allActivityTypes, currentActivityType);
     dataManager.SaveJson(allActivityTypes, TYPE_FILE_PATH);
 }
@@ -234,7 +297,8 @@ void PrintHelp(bool menuMode)
         Console.WriteLine(
         "exit -> exit\n" +
         "create new activity type (group) -> new save\n" +
-        "load an activity type -> [enter it's id]\n"
+        "load an activity type -> [enter it's id]\n" +
+        "delete"
         );
     }
     else
@@ -244,6 +308,7 @@ void PrintHelp(bool menuMode)
             "stop activity -> stop\n" +
             "add note -> note\n" +
             "save activity -> save\n" +
+            "delete activity -> delete\n" +
             "go to menu -> menu"
         );
     }

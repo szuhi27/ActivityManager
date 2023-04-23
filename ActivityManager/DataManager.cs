@@ -21,7 +21,7 @@ namespace ActivityManager
             remove
         }
 
-        public ActivityType ReturnChosenActivityType(int id, ActivityType[] activityTypes)
+        public ActivityType ReturnActivityTypeBasedOnId(int id, ActivityType[] activityTypes)
         {
             for (int j = 0; j < activityTypes.Length; j++)
             {
@@ -30,15 +30,34 @@ namespace ActivityManager
                     return activityTypes[j];
                 }
             }
-            throw new WrongInputException($"Save with {id} id does not exist!");
+            throw new WrongInputException($"Type with {id} id does not exist!");
         }
 
-        public ActivityType[] CreateNewSave(ActivityType[] activityTypes, string name, string path)
+        public Activity ReturnActivityBasedOnId(int id, Activity[] activities)
+        {
+            for (int j = 0; j < activities.Length; j++)
+            {
+                if (activities[j].Id == id)
+                {
+                    return activities[j];
+                }
+            }
+            throw new WrongInputException($"Activity with {id} id does not exist!");
+        }
+
+        public ActivityType[] CreateNewType(ActivityType[] activityTypes, string name, string path)
         {
             List<ActivityType> activities = activityTypes.ToList();
             activities.Add(new ActivityType(activityTypes.Length+1,name, Array.Empty<Activity>()));
             SaveJson(activities.ToArray(), path);
             return activities.ToArray();
+        }
+
+        public ActivityType[] DeleteType(ActivityType[] allTypes, ActivityType type)
+        {
+            List<ActivityType> activityTypes = allTypes.ToList();
+            activityTypes.Remove(type);
+            return activityTypes.ToArray();
         }
 
         public ActivityType ReturnModifiedActivityArray(ActivityType atype, Activity activity, ActivityModifierCall call)
