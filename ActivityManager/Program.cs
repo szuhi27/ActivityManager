@@ -110,6 +110,7 @@ void HandleNewTypeSave()
         Console.Clear();
         Console.WriteLine($"Current save: {currentActivityType.Id}-{currentActivityType.Name}");
         WriteAllItemsFromArray(currentActivityType.Activities, " - No activites yet - ");
+        inMenu = false;
     }
     else
     {
