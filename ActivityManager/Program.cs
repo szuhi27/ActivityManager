@@ -51,25 +51,25 @@ while (true)
                 inMenu = true;
                 break;
             case "new type":
-                if (inMenu) { HandleNewTypeSave(); }
+                if (inMenu) { HandleNewTypeSave(); } else { Console.WriteLine("Unknown input!"); }
                 break;
             case "delete type":
-                if (inMenu) { HandleDeleteType(); }
+                if (inMenu) { HandleDeleteType(); } else { Console.WriteLine("Unknown input!"); }
                 break;
             case "start":
-                if (!inMenu) { HandleStartNewActivity(); }
+                if (!inMenu) { HandleStartNewActivity(); } else { Console.WriteLine("Unknown input!"); }
                 break;
             case "stop":
-                if (!inMenu) { HandleStopActivity(); }
+                if (!inMenu) { HandleStopActivity(); } else { Console.WriteLine("Unknown input!"); }
                 break;
             case "note":
-                if (!inMenu) { HandleAddNoteToActivity(); }
+                if (!inMenu) { HandleAddNoteToActivity(); } else { Console.WriteLine("Unknown input!"); }
                 break;
             case "save":
-                if (!inMenu) { HandleSaveActivity(); }
+                if (!inMenu) { HandleSaveActivity(); } else { Console.WriteLine("Unknown input!"); }
                 break;
             case "delete":
-                if(!inMenu) { HandleDeleteActivity(); }
+                if(!inMenu) { HandleDeleteActivity(); } else { Console.WriteLine("Unknown input!"); }
                 break;
             default:
                 Console.WriteLine("Unknown input!");
@@ -97,6 +97,8 @@ void WriteAllItemsFromArray<T>(T[] collection, string emptyMsg)
         Console.WriteLine(emptyMsg);
     }
 }
+
+//====ActivityType controls====
 
 void HandleNewTypeSave()
 {
@@ -172,6 +174,8 @@ void HandleTypeChoiceById(int id)
         }
     }
 }
+
+//====Activity controls====
 
 void HandleStartNewActivity()
 {
