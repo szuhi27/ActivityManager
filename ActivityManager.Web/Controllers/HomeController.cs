@@ -23,6 +23,11 @@ namespace ActivityManager.Web.Controllers
             return View();
         }
 
+        public IActionResult ListItemClick() 
+        {
+            return View(); //todo view
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

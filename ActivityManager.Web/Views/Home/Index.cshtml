@@ -2,7 +2,21 @@
     ViewData["Title"] = "Home Page";
 }
 
+<script src="~/js/home.js" asp-append-version="true"></script>
+
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+<template id="listitem" data-id>
+    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="ListItemClick"></a>
+</template>
+
+<div>
+    <ul>
+        <li>
+            
+        </li>
+    </ul>
 </div>
