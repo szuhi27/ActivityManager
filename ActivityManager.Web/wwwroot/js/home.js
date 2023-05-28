@@ -7,5 +7,5 @@ function{
 }
 
 // save to localstorage, when choos, put that one into session ->
-    //go new page, load session storage 
+    //go new page, load session storage
     // ?!
