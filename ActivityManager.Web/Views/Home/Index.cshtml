@@ -3,15 +3,23 @@
 }
 
 <template id="listitemTemplate">
-    <li data-activityName>
-        <a id="nameLink" class="nav-link" asp-area="" 
+    <li data-activityName 
+        class="mb-2 p-1 bg-light bg-opacity-10 
+            border border-warning rounded-end
+            d-flex">
+        <a id="nameLink" class="nav-line d-inline p-2" asp-area="" 
             asp-controller="Home" asp-action="ListItemClick">
-            Activity
+                Activity
         </a>
+        <button type="button" 
+            class="btn btn-danger d-inline"
+            onclick="clickDeleteActivity()">
+                Delete
+        </button>
     </li>
 </template>
 
-<div class="container text-center">
+<div class="container d-flex justify-content-center">
     <div class="row text-center">
         <div class="col-md-auto">
             <ul id="activities-list"></ul>
@@ -20,7 +28,7 @@
             <form>
                 <input name="activityNameInput" type="text" class="form-control mb-3" 
                     id="exampleInputPassword1" placeholder="Activity name">
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-primary">Create</button>
             </form>
         </div>
     </div>

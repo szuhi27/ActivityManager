@@ -4,6 +4,8 @@ const form = document.querySelector('form');
 const activityNameInput = document.querySelector("[name='activityNameInput']");
 const activitiesList = document.getElementById('activities-list');
 
+let currentDeleteID = 0;
+
 // Side Effects / Lifecycle
 
 const existingActivitiesJson = JSON.parse(localStorage.getItem('activities')) || [];
@@ -23,6 +25,11 @@ function addTodo(activtiyName) {
     activitiesList.appendChild(clone);
     localStorage.setItem('activities', JSON.stringify(activitiesArray));
     activityNameInput.value = ''
+}
+
+function clickDeleteActivity() {
+    // currentDeletID = button parent dataset
+    // show "are u sure" panel
 }
 
 // Events
