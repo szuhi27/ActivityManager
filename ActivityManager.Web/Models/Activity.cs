@@ -2,11 +2,11 @@
 
 namespace ActivityManager.Web.Models
 {
-    public class ActivityModel
+    public class Activity
     {
         public Guid Id { get; set; }
-        [Required] public string? StartTime { get; set; }
-        public string? EndTime { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime? EndTime { get; set; }
         public double? Duration { get; set; }
         public string? Note { get; set; }
     }
