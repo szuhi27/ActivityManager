@@ -26,7 +26,7 @@ namespace ActivityManager.Web.Controllers
         public IActionResult ListItemClick() 
         {
             return View("Index"); //todo view
-        }
+        } 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

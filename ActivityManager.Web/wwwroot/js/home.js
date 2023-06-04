@@ -28,6 +28,10 @@ function addTodo(activtiyName) {
 }
 
 function clickDeleteActivity() {
+    let text = "Press a button!\nEither OK or Cancel.";
+    if (confirm(text) == true) {
+        //todo
+    } 
     // currentDeletID = button parent dataset
     // show "are u sure" panel
 }
