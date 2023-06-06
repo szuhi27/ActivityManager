@@ -12,9 +12,9 @@ const existingActivitiesJson = JSON.parse(localStorage.getItem('activities')) ||
 
 const activitiesArray = [];
 
-existingActivitiesJson.forEach(activtiy => {
+/*existingActivitiesJson.forEach(activtiy => {
     addTodo(activtiy);
-});
+});*/
 
 function addTodo(activtiyName) {
     activitiesArray.push(activtiyName);
@@ -27,7 +27,7 @@ function addTodo(activtiyName) {
     activityNameInput.value = ''
 }
 
-function clickDeleteActivity() {
+/*function clickDeleteActivity() {
     let text = "Press a button!\nEither OK or Cancel.";
     if (confirm(text) == true) {
         //todo
@@ -40,4 +40,4 @@ function clickDeleteActivity() {
 form.onsubmit = (event) => {
     event.preventDefault();
     addTodo(activityNameInput.value);
-}
+}*/
