@@ -1,5 +1,19 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model ActivityManager.Web.Models.ActivityType
+
 @{
+    ViewData["Title"] = "Delete";
 }
+
+
+<h3>Are you sure you want to delete @Model.Name?</h3>
+<h4>It has @Model.Activities.Count recorded activities.</h4>
+ 
+<div d-flex>
+    <button type="button"
+            class="btn btn-danger d-inline-flex"
+            asp-action="DeleteConfirm" asp-route-id="@Model.Id">
+        Delete
+    </button>
+
+    <a d-inline-flex ms-2 asp-action="Index">Back to main menu</a>
+</div>

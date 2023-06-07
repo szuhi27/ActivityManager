@@ -36,19 +36,18 @@
                             asp-route-id="@item.Id">
                             @item.Name
                         </a>
-                        <button type="button"
-                                class="btn btn-danger d-inline-flex ms-auto"
-                             asp-action="Delete" asp-route-id="@item.Id">
-                            Delete
-                        </button>
+                        <a class=" d-inline-flex ms-auto" 
+                            asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        
                     </li>
                 }
             </ul>
         </div>
         <div class="col-md-auto">
-            <form>
+            <h4>Create new ActivityType</h4>
+            <form asp-action="Create">
                 <input name="activityNameInput" type="text" class="form-control mb-3" 
-                    id="exampleInputPassword1" placeholder="Activity name">
+                    placeholder="Activity name">
                 <button type="submit" class="btn btn-primary">Create</button>
             </form>
         </div>

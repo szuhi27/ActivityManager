@@ -39,9 +39,41 @@ namespace ActivityManager.Web.Controllers
             return View("Index"); //todo view
         }
 
-        public IActionResult Delete(Guid? id)
+        [HttpPost]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(string activityNameInput)//[Bind("Id,Name")] ActivityType activityType)
         {
-            return View();
+            ActivityType activityType = new();
+         //   if (ModelState.IsValid)
+           // {
+            if(activityNameInput != null)
+            {
+                activityType.Id = Guid.NewGuid();
+                activityType.Name = activityNameInput;
+                _context.Add(activityType);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+
+            //}
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Delete(Guid? id)
+        {
+            if (id == null || _context.ActivityType == null)
+            {
+                return NotFound();
+            }
+
+            var activityType = await _context.ActivityType
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (activityType == null)
+            {
+                return NotFound();
+            }
+
+            return View(activityType);
         }
 
         public IActionResult Privacy()
