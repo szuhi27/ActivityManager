@@ -76,6 +76,24 @@ namespace ActivityManager.Web.Controllers
             return View(activityType);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        {
+            if (_context.ActivityType == null)
+            {
+                return Problem("Entity set 'ActivityManagerWebContext.ActivityType'  is null.");
+            }
+            var activityType = await _context.ActivityType.FindAsync(id);
+            if (activityType != null)
+            {
+                _context.ActivityType.Remove(activityType);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
         public IActionResult Privacy()
         {
             return View();

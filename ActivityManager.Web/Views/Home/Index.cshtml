@@ -21,7 +21,7 @@
     </li>
 </template>
 
-<div class="container d-flex justify-content-center">
+<div>
     <div class="row text-center">
         <div class="col-md-auto">
             <ul id="activities-list">
@@ -36,8 +36,9 @@
                             asp-route-id="@item.Id">
                             @item.Name
                         </a>
-                        <a class=" d-inline-flex ms-auto" 
-                            asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        <a class=" d-inline-flex ms-auto align-self-center
+                                p-1 rounded text-danger"
+                           asp-action="Delete" asp-route-id="@item.Id">[Delete]</a>
                         
                     </li>
                 }
