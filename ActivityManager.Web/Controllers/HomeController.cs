@@ -34,28 +34,22 @@ namespace ActivityManager.Web.Controllers
             return View();
         }*/
 
-        public IActionResult ListItemClick() 
-        {
-            return View("Index"); //todo view
-        }
-
         [HttpPost]
         //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string activityNameInput)//[Bind("Id,Name")] ActivityType activityType)
+        public async Task<IActionResult> Create(string activityNameInput)
         {
-            ActivityType activityType = new();
-         //   if (ModelState.IsValid)
-           // {
             if(activityNameInput != null)
             {
-                activityType.Id = Guid.NewGuid();
-                activityType.Name = activityNameInput;
+                ActivityType activityType = new()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = activityNameInput
+                };
                 _context.Add(activityType);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
-            //}
             return RedirectToAction(nameof(Index));
         }
 
@@ -71,6 +65,16 @@ namespace ActivityManager.Web.Controllers
             if (activityType == null)
             {
                 return NotFound();
+            }
+
+
+            ///??!?!?!??! TODO
+            foreach (var activity in _context.Activity)
+            {
+                if (activity.ActivityTypeId == id)
+                {
+                    activityType.Activities.Add(activity);
+                }
             }
 
             return View(activityType);

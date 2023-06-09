@@ -1,4 +1,4 @@
-﻿let listitemTemplate = document.getElementById("listitemTemplate");
+﻿/*let listitemTemplate = document.getElementById("listitemTemplate");
 
 const form = document.querySelector('form');
 const activityNameInput = document.querySelector("[name='activityNameInput']");
@@ -15,7 +15,7 @@ const activitiesArray = [];
 /*existingActivitiesJson.forEach(activtiy => {
     addTodo(activtiy);
 });*/
-
+/*
 function addTodo(activtiyName) {
     activitiesArray.push(activtiyName);
     const clone = listitemTemplate.content.cloneNode(true);
@@ -25,7 +25,7 @@ function addTodo(activtiyName) {
     activitiesList.appendChild(clone);
     localStorage.setItem('activities', JSON.stringify(activitiesArray));
     activityNameInput.value = ''
-}
+}*/
 
 /*function clickDeleteActivity() {
     let text = "Press a button!\nEither OK or Cancel.";
@@ -41,3 +41,5 @@ form.onsubmit = (event) => {
     event.preventDefault();
     addTodo(activityNameInput.value);
 }*/
+
+ 

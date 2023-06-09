@@ -9,5 +9,8 @@ namespace ActivityManager.Web.Models
         public DateTime? EndTime { get; set; }
         public double? Duration { get; set; }
         public string? Note { get; set; }
+        public bool IsSaved { get; set; }
+        public Guid ActivityTypeId { get; set; }
+        public ActivityType ActivityType { get; set; } = null!;
     }
 }

@@ -1,53 +1,68 @@
-﻿@model IEnumerable<ActivityManager.Web.Models.Activity>
+﻿@model ActivityManager.Web.Models.ActivityType
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.StartTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EndTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Duration)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Note)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Duration)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Note)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div>
+    <h1>@Model.Name</h1>
+    <div class="row text-center">
+        <div class="col-md-auto">
+            <ul id="activities-list">
+                @foreach (var item in Model.Activities)
+                {
+                    <li class="mb-2 p-1 bg-light bg-opacity-10
+                            border border-warning rounded-end
+                            d-block-flex">
+                        <div class="d-inline-flex">
+                            <p>@item.StartTime</p>
+                            <p>@item.EndTime</p>
+                            <p>@item.Duration</p>
+                        </div>
+                        <p>@item.Note</p>
+                        <a class="p-1 rounded text-danger"
+                           asp-action="Delete" asp-route-id="@item.Id">
+                            [Delete]
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="col-md-auto">
+            @if (Model.Activities.Count == 0 || Model.Activities.Last().IsSaved)
+            {
+                <h4>Start new Activity</h4>
+                <form asp-action="Start">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="submit" value="Start" class="btn btn-primary" />
+                </form>
+            }
+            else if (Model.Activities.Last().EndTime == null)
+            {
+                <h4>Stop ongoing Activity</h4>
+                <p>Start: @Model.Activities.Last().StartTime</p>
+                <form asp-action="Stop">
+                    <button type="submit" class="btn btn-primary" 
+                        asp-route-id="@Model.Activities.Last().Id">
+                        Stop
+                    </button>
+                </form>
+            }
+            else
+            {
+                <h4>Submit ongoing Activity</h4>
+                <p>Start: @Model.Activities.Last().StartTime</p>
+                <p>Stop: @Model.Activities.Last().EndTime</p>
+                <p>Duration: @Model.Activities.Last().Duration</p>
+                <form asp-action="Submit">
+                    <input name="note" type="text" class="form-control mb-3"
+                           placeholder="Add note (optional)">
+                    <button type="submit" class="btn btn-primary"
+                            asp-route-id="@Model.Activities.Last().Id">
+                        Submit
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+</div>

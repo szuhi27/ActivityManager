@@ -4,6 +4,7 @@ using ActivityManager.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ActivityManager.Web.Migrations
 {
     [DbContext(typeof(ActivityManagerWebContext))]
-    partial class ActivityManagerWebContextModelSnapshot : ModelSnapshot
+    [Migration("20230608161219_activity-saved-bool")]
+    partial class activitysavedbool
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,7 +31,7 @@ namespace ActivityManager.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ActivityTypeId")
+                    b.Property<Guid?>("ActivityTypeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double?>("Duration")
@@ -70,13 +73,9 @@ namespace ActivityManager.Web.Migrations
 
             modelBuilder.Entity("ActivityManager.Web.Models.Activity", b =>
                 {
-                    b.HasOne("ActivityManager.Web.Models.ActivityType", "ActivityType")
+                    b.HasOne("ActivityManager.Web.Models.ActivityType", null)
                         .WithMany("Activities")
-                        .HasForeignKey("ActivityTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ActivityType");
+                        .HasForeignKey("ActivityTypeId");
                 });
 
             modelBuilder.Entity("ActivityManager.Web.Models.ActivityType", b =>
