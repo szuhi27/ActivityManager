@@ -4,24 +4,44 @@
     ViewData["Title"] = "Index";
 }
 
+@functions{
+    Activity? ReturnOpenActivity(ActivityType at)
+    {
+        foreach(var a in at.Activities)
+        {
+            if (!a.IsSaved)
+            {
+                return a;
+            }
+        }
+        return null;
+    }
+}
+
 <div>
     <h1>@Model.Name</h1>
     <div class="row text-center">
         <div class="col-md-auto">
             <ul id="activities-list">
+                @{Model.Activities.OrderBy(a => a.StartTime);}
                 @foreach (var item in Model.Activities)
                 {
                     <li class="mb-2 p-1 bg-light bg-opacity-10
                             border border-warning rounded-end
                             d-block-flex">
-                        <div class="d-inline-flex">
-                            <p>@item.StartTime</p>
-                            <p>@item.EndTime</p>
-                            <p>@item.Duration</p>
+                        <div class="d-block">
+                            <div class="d-inline-flex">
+                                <p>@item.StartTime   |</p>
+                                <p class="ms-auto">   @item.EndTime</p>
+                            </div>
+                            @if (item.Duration != null)
+                            {
+                                <p>Duration: @item.Duration</p>
+                            }
                         </div>
                         <p>@item.Note</p>
                         <a class="p-1 rounded text-danger"
-                           asp-action="Delete" asp-route-id="@item.Id">
+                           asp-action="Delete" asp-route-id="@item.Id" asp-route-typeId="@Model.Id">
                             [Delete]
                         </a>
                     </li>
@@ -29,7 +49,7 @@
             </ul>
         </div>
         <div class="col-md-auto">
-            @if (Model.Activities.Count == 0 || Model.Activities.Last().IsSaved)
+            @if (Model.Activities.Count == 0 || ReturnOpenActivity(Model) == null)
             {
                 <h4>Start new Activity</h4>
                 <form asp-action="Start">
@@ -37,30 +57,26 @@
                     <input type="submit" value="Start" class="btn btn-primary" />
                 </form>
             }
-            else if (Model.Activities.Last().EndTime == null)
+            else if (ReturnOpenActivity(Model).EndTime == null)
             {
                 <h4>Stop ongoing Activity</h4>
-                <p>Start: @Model.Activities.Last().StartTime</p>
+                <p>Start: @Model.Activities.First().StartTime</p>
                 <form asp-action="Stop">
-                    <button type="submit" class="btn btn-primary" 
-                        asp-route-id="@Model.Activities.Last().Id">
-                        Stop
-                    </button>
+                    <input type="hidden" asp-for="Id" />
+                    <input type="submit" value="Stop" class="btn btn-primary" />
                 </form>
             }
             else
             {
                 <h4>Submit ongoing Activity</h4>
-                <p>Start: @Model.Activities.Last().StartTime</p>
-                <p>Stop: @Model.Activities.Last().EndTime</p>
-                <p>Duration: @Model.Activities.Last().Duration</p>
+                <p>Start: @Model.Activities.First().StartTime</p>
+                <p>Stop: @Model.Activities.First().EndTime</p>
+                <p>Duration: @Model.Activities.First().Duration</p>
                 <form asp-action="Submit">
                     <input name="note" type="text" class="form-control mb-3"
                            placeholder="Add note (optional)">
-                    <button type="submit" class="btn btn-primary"
-                            asp-route-id="@Model.Activities.Last().Id">
-                        Submit
-                    </button>
+                    <input type="hidden" asp-for="Id" />
+                    <input type="submit" value="Submit" class="btn btn-primary" />
                 </form>
             }
         </div>

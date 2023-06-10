@@ -61,20 +61,12 @@ namespace ActivityManager.Web.Controllers
             }
 
             var activityType = await _context.ActivityType
+                .Include(m => m.Activities)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (activityType == null)
             {
                 return NotFound();
-            }
-
-
-            ///??!?!?!??! TODO
-            foreach (var activity in _context.Activity)
-            {
-                if (activity.ActivityTypeId == id)
-                {
-                    activityType.Activities.Add(activity);
-                }
             }
 
             return View(activityType);

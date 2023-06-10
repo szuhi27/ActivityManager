@@ -12,11 +12,14 @@ namespace ActivityManager.Web.Controllers
 {
     public class ActivitiesController : Controller
     {
+        private readonly ILogger<HomeController> _logger;
         private readonly ActivityManagerWebContext _context;
+        ActivityType _activityType = new();
 
-        public ActivitiesController(ActivityManagerWebContext context)
+        public ActivitiesController(ActivityManagerWebContext context, ILogger<HomeController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: Activities
@@ -27,7 +30,10 @@ namespace ActivityManager.Web.Controllers
                 return NotFound();
             }
 
-            var activityType = GetActivityTypeWithItsActivities(id);
+            var activityType = await _context.ActivityType
+                .Include(m => m.Activities)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (activityType == null)
             {
                 return NotFound();
@@ -36,74 +42,41 @@ namespace ActivityManager.Web.Controllers
             return View(activityType);
         }
 
-        // GET: Activities/Details/5
-        /*public async Task<IActionResult> Details(Guid? id)
-        {
-            if (id == null || _context.Activity == null)
-            {
-                return NotFound();
-            }
-
-            var activity = await _context.Activity
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (activity == null)
-            {
-                return NotFound();
-            }
-
-            return View(activity);
-        }*/
-
-        // GET: Activities/Create
-        /*public IActionResult Create()
-        {
-            return View();
-        }*/
-
-        // POST: Activities/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        public async Task<IActionResult> Start(Guid id)     //[Bind("Id,StartTime,EndTime,Duration,Note")] Activity activity)
+        public async Task<IActionResult> Start(Guid id)
         {
-            /*var activityType = await _context.ActivityType.FindAsync(id);
-            if (activityType == null)
-            {
-                return NotFound();
-            }*/
             var activity = new Activity
             {
                 Id = Guid.NewGuid(),
                 StartTime = DateTime.Now,
                 ActivityTypeId = id
             };
-            //activityType.Activities.Add(activity);
-            //_context.Update(activityType);
-            //await _context.SaveChangesAsync();
             _context.Add(activity);
             await _context.SaveChangesAsync();
-            return View("Index", GetActivityTypeWithItsActivities(id));
-            /*Activity activity = new();
-            activity.Id = Guid.NewGuid();
-            activity.StartTime = DateTime.Now;
-            activity.ActivityTypeId = activityType.Id;
-            activity.ActivityType = activityType;
-            activityType.Activities.Add(activity);
-            _context.Update(activityType);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index), activityType);*/
+
+            var activityType = await _context.ActivityType
+                .Include(m => m.Activities)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            return View("Index", activityType);
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Stop(Guid id)
         {
+
             if (_context.Activity == null)
             {
                 return NotFound();
             }
 
-            var activity = await _context.Activity.FindAsync(id);
+
+            var activityType = await _context.ActivityType
+                .Include(m => m.Activities)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            var activity = ReturnOpenActivity(activityType);
+
             if (activity == null)
             {
                 return NotFound();
@@ -113,23 +86,9 @@ namespace ActivityManager.Web.Controllers
             TimeSpan d = (TimeSpan)(activity.EndTime - activity.StartTime);
             activity.Duration = Math.Round(d.TotalMinutes, 2);
 
-            try
-            {
-                _context.Update(activity);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ActivityExists(activity.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return View("Index", GetActivityTypeWithItsActivities(activity.ActivityTypeId));
+            await _context.SaveChangesAsync();
+
+            return View("Index", activityType);
         }
 
         [HttpPost]
@@ -141,7 +100,12 @@ namespace ActivityManager.Web.Controllers
                 return NotFound();
             }
 
-            var activity = await _context.Activity.FindAsync(id);
+            var activityType = await _context.ActivityType
+                .Include(m => m.Activities)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            var activity = ReturnOpenActivity(activityType);
+
             if (activity == null)
             {
                 return NotFound();
@@ -150,134 +114,46 @@ namespace ActivityManager.Web.Controllers
             activity.Note = note;
             activity.IsSaved = true;
 
-            try
-            {
-                _context.Update(activity);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ActivityExists(activity.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return RedirectToAction(nameof(Index));
+            await _context.SaveChangesAsync();
+
+            return View("Index", activityType);
         }
 
-
-
-
-
-
-
-        // GET: Activities/Edit/5
-        /*public async Task<IActionResult> Edit(Guid? id)
+        Activity? ReturnOpenActivity(ActivityType at)
         {
-            if (id == null || _context.Activity == null)
+            foreach (var a in at.Activities)
             {
-                return NotFound();
-            }
-
-            var activity = await _context.Activity.FindAsync(id);
-            if (activity == null)
-            {
-                return NotFound();
-            }
-            return View(activity);
-        }*/
-
-        // POST: Activities/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-
-        /*
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,StartTime,EndTime,Duration,Note")] Activity activity)
-        {
-            if (id != activity.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                if (!a.IsSaved)
                 {
-                    _context.Update(activity);
-                    await _context.SaveChangesAsync();
+                    return a;
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ActivityExists(activity.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
             }
-            return View(activity);
-        }*/
+            return null;
+        }
 
         // GET: Activities/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
-        {
-            if (id == null || _context.Activity == null)
-            {
-                return NotFound();
-            }
-
-            var activity = await _context.Activity
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (activity == null)
-            {
-                return NotFound();
-            }
-
-            return View(activity);
-        }
-
-        // POST: Activities/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public async Task<IActionResult> Delete(Guid id, Guid typeId)
         {
             if (_context.Activity == null)
             {
-                return Problem("Entity set 'ActivityManagerWebContext.Activity'  is null.");
+                return NotFound();
             }
+
             var activity = await _context.Activity.FindAsync(id);
-            if (activity != null)
+
+            if (activity == null)
             {
-                _context.Activity.Remove(activity);
+                return NotFound();
             }
-            
+
+            _context.Activity.Remove(activity);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
 
-        ActivityType GetActivityTypeWithItsActivities(Guid id)
-        {
-            ActivityType activityType = _context.ActivityType.Find(id);
+            var activityType = await _context.ActivityType
+                .Include(m => m.Activities)
+                .FirstOrDefaultAsync(m => m.Id == typeId);
 
-            foreach (Activity activity in _context.Activity)
-            {
-                if (activity.Id == id) //???
-                {
-                    activityType.Activities.Add(activity);
-                }
-            }
-
-            return activityType;
+            return View("Index", activityType);
         }
 
         private bool ActivityExists(Guid id)
