@@ -1,0 +1,58 @@
+﻿@model IEnumerable<ActivityManager.Web.Models.ActivityType>
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<template id="listitemTemplate">
+    <li data-activityName 
+        class="mb-2 p-1 bg-light bg-opacity-10 
+            border border-warning rounded-end
+            d-flex">
+        <a id="nameLink" class="nav-line d-inline-flex p-2" asp-area="" 
+            asp-controller="Home" asp-action="ListItemClick">
+                Activity
+        </a>
+        <button type="button"
+                class="btn btn-danger d-inline-flex ms-auto"
+            onclick="clickDeleteActivity()">
+                Delete
+        </button>
+    </li>
+</template>
+
+<div>
+    <div class="row text-center">
+        <div class="col-md-auto">
+            <ul id="activities-list">
+                @foreach (var item in Model)
+                {
+                    <li class="mb-2 p-1 bg-light bg-opacity-10
+                            border border-warning rounded-end
+                            d-flex">
+                        <a id="nameLink" class="nav-line d-inline-flex p-2"
+                            asp-controller="Activities" asp-action="Index"
+                            asp-route-id="@item.Id">
+                            @item.Name
+                        </a>
+                        <a class=" d-inline-flex ms-auto align-self-center
+                                p-1 rounded text-danger"
+                           asp-action="Delete" asp-route-id="@item.Id">
+                           [Delete]
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="col-md-auto">
+            <h4>Create new ActivityType</h4>
+            <form asp-action="Create">
+                <input name="activityNameInput" type="text" class="form-control mb-3" 
+                    placeholder="Activity name">
+                <button type="submit" class="btn btn-primary">Create</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/home.js" asp-append-version="true"></script>

@@ -1,0 +1,17 @@
+﻿@model ActivityManager.Web.Models.ActivityType
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+
+<h3>Are you sure you want to delete @Model.Name?</h3>
+<h4>It has @Model.Activities.Count recorded activities.</h4>
+ 
+<div d-flex>
+    <form asp-action="DeleteConfirmed">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Confirm delete" class="btn btn-danger" /> |
+        <a asp-action="Index">Back to main menu</a>
+    </form>
+</div>
