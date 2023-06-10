@@ -8,8 +8,6 @@ namespace ActivityManager.Web.Controllers
 {
     public class HomeController : Controller
     {
-       // private readonly ILogger<HomeController> _logger;
-
         private readonly ActivityManagerWebContext _context;
 
         public HomeController(ActivityManagerWebContext context)
@@ -24,18 +22,7 @@ namespace ActivityManager.Web.Controllers
                         Problem("Entity set 'ActivityManagerWebContext.ActivityType'  is null.");
         }
 
-        /*public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }*/
-
-        /*public IActionResult Index()
-        {
-            return View();
-        }*/
-
         [HttpPost]
-        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string activityNameInput)
         {
             if(activityNameInput != null)
